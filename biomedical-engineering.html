@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>生物医学工程就业全景思维导图 · 黑白 Canvas</title>
+<style>
+:root{color-scheme:light} *{box-sizing:border-box} html,body{margin:0;width:100%;height:100%;background:#fff;color:#111;font-family:"Noto Sans CJK SC","Microsoft YaHei",Arial,sans-serif}
+#app{height:100%;display:flex;flex-direction:column} .bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid #222;background:#fff;flex:0 0 auto;z-index:2} .brand{font-size:15px;font-weight:700;margin-right:auto;white-space:nowrap} button,.search{font-family:inherit;font-size:13px;background:#fff;color:#111;border:1px solid #333;border-radius:3px;padding:8px 11px;cursor:pointer}.search{min-width:180px;flex:0 1 230px;cursor:text} button:hover{background:#eee}button.active{background:#111;color:#fff}button:focus-visible,.search:focus-visible{outline:2px solid #555;outline-offset:1px} .canvas-wrap{position:relative;flex:1;min-height:0;overflow:hidden;touch-action:none;cursor:grab;background:#fff} .canvas-wrap.dragging{cursor:grabbing}canvas{display:block;width:100%;height:100%}.tip{position:absolute;left:12px;bottom:12px;font-size:12px;background:#fff;border:1px solid #bbb;padding:6px 10px;max-width:calc(100% - 24px);pointer-events:none}.zoom{font-size:12px;border:1px solid #ddd;padding:8px 9px;font-variant-numeric:tabular-nums} @media (max-width:700px){.brand{width:100%;margin-right:0}.bar{padding:8px;gap:6px}.search{flex:1 1 130px;min-width:0}.tip{font-size:11px}.zoom{display:none}}
+@media print{.bar,.tip{display:none}#app{height:auto} .canvas-wrap{height:auto;overflow:visible}canvas{width:100%;height:auto}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="bar">
+    <span class="brand">生物医学工程 · 就业全景图（纯黑白）</span>
+    <input class="search" id="search" placeholder="搜索行业或岗位，如：工艺、算法" aria-label="搜索行业或岗位">
+    <button id="all" class="active">全部岗位</button>
+    <button id="bachelor">本科可投</button>
+    <button id="graduate">硕博方向</button>
+    <button id="fit">适配画面</button>
+    <button id="plus">放大 +</button>
+    <button id="minus">缩小 −</button>
+    <button id="download">保存 PNG</button>
+    <span class="zoom" id="zoom">100%</span>
+  </div>
+  <div class="canvas-wrap" id="wrap"><canvas id="board"></canvas><div class="tip">鼠标滚轮缩放 · 拖动移动 · 双指缩放 · 可按学历筛选 · 保存高清PNG</div></div>
+</div>
+<script>
+// 每个岗位的学历是常见招聘倾向，而非全部企业的硬性门槛。
+// “本”本科通常可投，“硕”硕士常见或更有优势，“博”偏研究岗；跨界岗位需具备相应技能。
+const data = [
+ {title:'01 先进制造与工程',side:'L',sections:[
+  {name:'半导体 / 集成电路',jobs:['设备工程师|本','测试工程师|本','制程 / 工艺工程师|本','FA失效分析|本/硕','NPI工程师|本','品质QA/QC|本','洁净室 / 厂务工程师|本','器件 / 工艺研发|硕/博']},
+  {name:'消费电子制造',jobs:['硬件测试工程师|本','PE产品工程师|本','ME制造工程师|本','NPI工程师|本','可靠性工程师|本','质量工程师(SQE/PQE)|本','硬件研发工程师|本/硕']},
+  {name:'光学 / 光电 / 精密仪器',jobs:['光学测试工程师|本','光机装调工程师|本','光学工艺工程师|本','成像系统工程师|本/硕','机器视觉工程师|本/硕','光学设计 / 研发|硕/博']},
+  {name:'自动化 / 工业装备',jobs:['设备调试工程师|本','自动化设备工程师|本','现场应用工程师(FAE)|本','PLC / 电气控制工程师|本/硕','机器视觉工程师|本/硕','运动控制工程师|本/硕']},
+  {name:'新能源 / 汽车电子',jobs:['电池 / 电子测试工程师|本','工艺工程师|本','设备工程师|本','质量 / 可靠性工程师|本','BMS测试工程师|本/硕','汽车电子研发|硕/博']}
+ ]},
+ {title:'02 医疗器械全产业链',side:'L',sections:[
+  {name:'通用制造与质量',jobs:['生产 / 工艺工程师|本','质量QA/QC/QE|本','体系 / 验证工程师|本','NPI工程师|本','注册专员(RA)|本','项目工程师|本','研发工程师|本/硕']},
+  {name:'有源设备 / 大型设备',jobs:['CT/MRI/超声/监护/呼吸机','设备测试工程师|本','现场服务工程师(FSE)|本','临床应用工程师|本','硬件 / 软件工程师|本/硕','成像算法工程师|硕/博']},
+  {name:'IVD体外诊断',jobs:['生化 / 免疫 / 分子 / POCT','仪器工艺 / 测试工程师|本','试剂生产 / QC|本','注册 / 应用工程师|本','试剂研发工程师|本/硕','产品经理|本/硕']},
+  {name:'高值医用耗材',jobs:['介入 / 电生理 / 骨科植入','跟台 / 临床技术支持|本','销售 / 市场专员|本','产品 / 专业教育专员|本','注册 / 临床评价|本','产品经理 / 专业教育经理(经验)|本/硕','植入材料研发|硕/博']},
+  {name:'低值医用耗材',jobs:['注射 / 输液 / 敷料 / 一次性器械','生产 / 工艺工程师|本','QA/QC|本','灭菌 / 包装验证|本','注册 / 供应链专员|本','材料 / 产品研发|本/硕']},
+  {name:'康复 / 穿戴 / 辅助器具',jobs:['康复设备应用工程师|本','穿戴硬件测试工程师|本','传感器工程师|本/硕','康复机器人研发|硕/博','脑机接口研发|硕/博']}
+ ]},
+ {title:'03 药企 / CRO / 生物技术',side:'L',sections:[
+  {name:'传统药企 / 生物制药',jobs:['生产工艺 / GMP工程师|本','QA / QC|本','设备 / 验证工程师|本','药品注册助理|本','临床试验助理(CTA)|本','制剂 / 工艺开发|硕','药物研发科学家|博']},
+  {name:'CRO / SMO临床研究',jobs:['CRC协调员(SMO)|本','CRA临床监查员|本','CTA临床助理|本','临床数据管理(CDM)|本','药物警戒(PV)|本','SAS程序员|本/硕','生物统计师|硕/博']},
+  {name:'CDMO / 生物技术',jobs:['GMP生产 / 质量|本','工艺 / 设备验证|本','技术转移工程师|本/硕','工艺 / 分析研发|硕','基因检测技术员|本','生物信息 / 合成生物研究|硕/博']}
+ ]},
+ {title:'04 医院 / 医疗机构',side:'L',sections:[
+  {name:'设备科 / 医学工程科',jobs:['医疗设备管理|本','设备维护 / 质控工程师|本','医学工程技术岗|本/硕','设备采购 / 计量管理|本']},
+  {name:'信息科 / 数字医疗',jobs:['HIS/LIS/PACS运维|本','医疗信息化实施|本','医院数据管理|本','医疗软件开发|本/硕','医疗AI平台工程师|本/硕']},
+  {name:'放疗科 / 科研平台',jobs:['放疗物理技术岗|本/硕','医学物理师|硕/博','科研助理|本','实验技术员|本','医学影像科研岗|硕/博']}
+ ]},
+ {title:'05 计算机 / AI / 数据',side:'R',sections:[
+  {name:'医疗AI / 医学影像AI',jobs:['AI测试工程师|本','医学影像数据工程师|本','医学图像处理工程师|本/硕','医学影像算法工程师|硕','深度学习工程师|硕','医疗AI研究员|博']},
+  {name:'医疗软件 / 医疗信息化',jobs:['HIS/LIS/PACS实施工程师|本','软件测试工程师|本','系统集成 / 运维|本','医疗软件开发|本/硕','医疗软件产品经理|本/硕']},
+  {name:'嵌入式 / 固件 / 物联网',jobs:['嵌入式测试|本','MCU / 单片机开发|本/硕','固件开发工程师|本/硕','设备通信工程师|本/硕','智能硬件研发|本/硕']},
+  {name:'数据分析 / 生物医学数据',jobs:['数据分析师|本','临床数据管理(CDM)|本','BI / 数据运营|本','生物医学信号处理|本/硕','数据工程师|本/硕','生物统计 / 医学数据科学|硕/博']},
+  {name:'通用IT / 互联网',jobs:['前端开发工程师|本','后端开发工程师|本','Python / Java开发|本','软件测试 / 自动化测试|本','产品助理 / 产品运营|本','AI产品经理|本/硕']}
+ ]},
+ {title:'06 检测认证 / 法规服务',side:'R',sections:[
+  {name:'第三方检验检测',jobs:['医疗器械检测工程师|本','电气安全 / EMC测试|本','可靠性 / 软件测试|本','计量校准工程师|本','生物相容性检测|本/硕']},
+  {name:'注册 / 法规 / 临床评价',jobs:['注册事务专员(RA)|本','法规专员|本','质量体系专员|本','技术文档工程师|本','临床评价工程师|本/硕','法规咨询顾问|本/硕']},
+  {name:'设备服务 / 第三方运维',jobs:['医疗设备维保工程师|本','设备巡检工程师|本','售后 / 技术支持|本','医疗服务项目工程师|本']}
+ ]},
+ {title:'07 科研 / 高校 / 公共部门',side:'R',sections:[
+  {name:'高校 / 科研院所',jobs:['科研助理|本','实验技术员|本','科研工程师|硕','高校实验技术岗|本/硕','研究员 / 高校教师|博','博士后|博']},
+  {name:'政府 / 事业单位',jobs:['医院设备管理岗|本/硕','器械检验检测事业岗|本/硕','医疗信息化技术岗|本/硕','医械监管相关岗位|本/硕','专业不限综合管理岗|本','科技政策研究岗|硕/博']}
+ ]},
+ {title:'08 跨行业产品 / 商业 / 管理',side:'R',sections:[
+  {name:'产品 / 项目',jobs:['产品助理 / 企划专员|本','项目工程师 / 助理|本','技术项目经理|本/硕','医疗 / AI产品经理|本/硕','产品运营|本']},
+  {name:'企业软件 / 数字化',jobs:['ERP / MES实施工程师|本','软件实施顾问|本','业务分析助理|本','数字化咨询顾问|本/硕','解决方案工程师|本/硕']},
+  {name:'销售 / 市场 / 商务',jobs:['技术销售 / FAE|本','医疗器械销售|本','市场 / 产品专员|本','商务拓展(BD)|本','招投标专员|本','专业教育专员|本']},
+  {name:'供应链 / 质量 / 运营',jobs:['采购 / 供应链专员|本','供应商质量(SQE)|本','生产计划专员|本','质量管理专员|本','数据 / 用户 / AI运营|本']}
+ ]}
+];
+const canvas=document.getElementById('board'), wrap=document.getElementById('wrap');
+const buttons={all:document.getElementById('all'), bachelor:document.getElementById('bachelor'), graduate:document.getElementById('graduate')};
+let filter='all',query='',layout=null,world={w:4000,h:3300},scale=1,offset={x:0,y:0},lastViewport={w:0,h:0};
+const COLORS={ink:'#111',light:'#888',faint:'#ddd'};
+function f(ctx,size=26,bold=false){ctx.font=`${bold?700:400} ${size}px "Noto Sans CJK SC","Microsoft YaHei",Arial,sans-serif`}
+function m(ctx,s){return ctx.measureText(s).width}
+function qualified(job){const d=job.split('|')[1]||''; if(filter==='bachelor'&&!d.includes('本'))return false;if(filter==='graduate'&&!d.includes('硕')&&!d.includes('博'))return false;return true}
+function getFiltered(){return data.map(g=>({...g,sections:g.sections.map(s=>({...s,jobs:s.jobs.filter(j=>qualified(j)&&(!query||j.includes(query)||s.name.includes(query)||g.title.includes(query)))})).filter(s=>s.jobs.length)})).filter(g=>g.sections.length)}
+function packJobs(ctx,jobs,maxWidth){
+ f(ctx,24);let lines=[],parts=[];let curr='',w=0;
+ for(let job of jobs){let [name,degree]=job.split('|');let text=name+(degree?`〔${degree}〕`:'');let token=(curr?'  ·  ':'')+text;
+  if(curr && m(ctx,curr+token)>maxWidth){lines.push(curr);curr=text}else{curr+=token}
+ }
+ if(curr) lines.push(curr);
+ return lines;
+}
+function measureLayout(){
+ const off=document.createElement('canvas').getContext('2d');
+ const groups=getFiltered();const left=groups.filter(g=>g.side==='L'),right=groups.filter(g=>g.side==='R');
+ const W=4000, margin=95, gutter=275, cardW=(W-margin*2-gutter)/2, xL=margin,xR=W-margin-cardW;
+ function card(g,x){const sec=[];let total=104;
+  for(const s of g.sections){const lines=packJobs(off,s.jobs,cardW-350);const h=Math.max(68,lines.length*36+24);sec.push({...s,lines,h});total+=h+13}
+  total+=18;return {...g,sections:sec,w:cardW,x,h:total};
+ }
+ let curL=300,curR=300,gap=60;
+ const gl=left.map(g=>{const r=card(g,xL);r.y=curL;curL+=r.h+gap;return r});
+ const gr=right.map(g=>{const r=card(g,xR);r.y=curR;curR+=r.h+gap;return r});
+ const H=Math.max(curL,curR)+140;
+ return {groups:[...gl,...gr],W,H,centerX:W/2,cardW};
+}
+function text(ctx,t,x,y,size=24,bold=false,color=COLORS.ink){ctx.save();f(ctx,size,bold);ctx.fillStyle=color;ctx.fillText(t,x,y);ctx.restore()}
+function path(ctx,points,width=2,stroke=COLORS.ink){ctx.beginPath();ctx.moveTo(points[0][0],points[0][1]);points.slice(1).forEach(p=>ctx.lineTo(p[0],p[1]));ctx.lineWidth=width;ctx.strokeStyle=stroke;ctx.stroke()}
+function drawWorld(ctx){
+ ctx.fillStyle='#fff';ctx.fillRect(0,0,world.w,world.h);
+ const {groups,centerX,W,H}=layout;
+ text(ctx,'生物医学工程  /  就业行业全景思维导图',W/2-575,89,43,true);
+ path(ctx,[[160,121],[W-160,121]],2);
+ text(ctx,'按行业 → 细分赛道 → 岗位排序   ·   删除重复描述，只保留可投方向与学历标签',W/2-600,172,25);
+ // the central vertical tree trunk
+ path(ctx,[[centerX,225],[centerX,H-136]],2);
+ ctx.fillStyle='#fff';ctx.strokeStyle=COLORS.ink;ctx.lineWidth=3;ctx.strokeRect(centerX-126,221,252,73);
+ text(ctx,'生物医学工程',centerX-106,270,29,true);
+ for(const g of groups){
+  const cy=g.y+45, isL=g.side==='L', bx=isL?g.x+g.w:g.x;
+  ctx.beginPath();ctx.moveTo(centerX,cy);ctx.bezierCurveTo(centerX+(isL?-80:80),cy, bx+(isL?85:-85),cy, bx,cy);ctx.lineWidth=2.2;ctx.strokeStyle=COLORS.ink;ctx.stroke();
+  ctx.fillStyle='#fff';ctx.strokeStyle=COLORS.ink;ctx.lineWidth=2.3;ctx.strokeRect(g.x,g.y,g.w,g.h);
+  // small black square card marker
+  ctx.fillStyle=COLORS.ink;ctx.fillRect(g.x+28,g.y+25,14,14);
+  text(ctx,g.title,g.x+56,g.y+49,33,true);
+  path(ctx,[[g.x+26,g.y+73],[g.x+g.w-26,g.y+73]],1.2);
+  let y=g.y+107;
+  for(let si=0;si<g.sections.length;si++){
+   const s=g.sections[si];const nameX=g.x+33, descX=g.x+315;
+   text(ctx,s.name,nameX,y+20,24,true);
+   ctx.fillStyle=COLORS.ink;ctx.fillRect(nameX-3,y-3,4,25);
+   for(let i=0;i<s.lines.length;i++)text(ctx,s.lines[i],descX,y+20+i*36,24,false);
+   y+=s.h+13;
+   if(si<g.sections.length-1)path(ctx,[[g.x+28,y-7],[g.x+g.w-28,y-7]],1,COLORS.faint);
+  }
+ }
+ path(ctx,[[160,H-101],[W-160,H-101]],1.8);
+ text(ctx,'学历：〔本〕本科常见可投   〔硕〕硕士常见/更有优势   〔博〕博士偏研究   │   本/硕表示两个学历层次均可能有机会',175,H-60,25);
+ text(ctx,'说明：学历为求职导航，不等于企业必然接受生医工专业；跨半导体、IT、药研等岗位须满足课程、技能、经验及招聘条件。',175,H-20,23);
+}
+function viewport(){const r=wrap.getBoundingClientRect();return {w:r.width,h:r.height}}
+function draw(){const v=viewport(),dpr=Math.min(window.devicePixelRatio||1,2);const pixelW=Math.max(2,Math.round(v.w*dpr)),pixelH=Math.max(2,Math.round(v.h*dpr));if(canvas.width!==pixelW||canvas.height!==pixelH){canvas.width=pixelW;canvas.height=pixelH}const ctx=canvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,v.w,v.h);ctx.save();ctx.translate(offset.x,offset.y);ctx.scale(scale,scale);drawWorld(ctx);ctx.restore();document.getElementById('zoom').textContent=Math.round(scale*100)+'%'}
+function fit(){const v=viewport(),pad=30;scale=Math.min((v.w-pad*2)/world.w,(v.h-pad*2)/world.h);offset={x:(v.w-world.w*scale)/2,y:(v.h-world.h*scale)/2};draw()}
+function rebuild(){layout=measureLayout();world={w:layout.W,h:layout.H};fit()}
+function zoomAt(factor,x,y){const next=Math.max(.08,Math.min(2.7,scale*factor));const k=next/scale;offset={x:x-(x-offset.x)*k,y:y-(y-offset.y)*k};scale=next;draw()}
+function applyFilter(v){filter=v;for(const [name,btn] of Object.entries(buttons))btn.classList.toggle('active',name===v);rebuild()}
+for(const [key,btn]of Object.entries(buttons))btn.addEventListener('click',()=>applyFilter(key));
+document.getElementById('search').addEventListener('input',e=>{query=e.target.value.trim();rebuild()});
+document.getElementById('fit').addEventListener('click',fit);
+document.getElementById('plus').addEventListener('click',()=>{const v=viewport();zoomAt(1.3,v.w/2,v.h/2)});
+document.getElementById('minus').addEventListener('click',()=>{const v=viewport();zoomAt(1/1.3,v.w/2,v.h/2)});
+document.getElementById('download').addEventListener('click',()=>{
+ const out=document.createElement('canvas');const factor=1.4;out.width=Math.round(world.w*factor);out.height=Math.round(world.h*factor);const ctx=out.getContext('2d');ctx.scale(factor,factor);drawWorld(ctx);const a=document.createElement('a');a.download='生物医学工程就业全景图_黑白版.png';a.href=out.toDataURL('image/png');a.click();
+});
+wrap.addEventListener('wheel',e=>{e.preventDefault();const r=wrap.getBoundingClientRect();zoomAt(Math.exp(-e.deltaY*.0014),e.clientX-r.left,e.clientY-r.top)},{passive:false});
+let pointers=new Map(),prevDist=null;
+wrap.addEventListener('pointerdown',e=>{pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});wrap.setPointerCapture(e.pointerId);wrap.classList.add('dragging')});
+wrap.addEventListener('pointermove',e=>{
+ if(!pointers.has(e.pointerId))return;const p=pointers.get(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ if(pointers.size===1){offset.x+=e.clientX-p.x;offset.y+=e.clientY-p.y;draw()}
+ else if(pointers.size===2){const pair=[...pointers.values()],d=Math.hypot(pair[0].x-pair[1].x,pair[0].y-pair[1].y);if(prevDist){const r=wrap.getBoundingClientRect();zoomAt(d/prevDist,(pair[0].x+pair[1].x)/2-r.left,(pair[0].y+pair[1].y)/2-r.top)}prevDist=d}
+});
+for(const event of ['pointerup','pointercancel'])wrap.addEventListener(event,e=>{pointers.delete(e.pointerId);prevDist=null;if(!pointers.size)wrap.classList.remove('dragging')});
+window.addEventListener('resize',()=>{const now=viewport();if(Math.abs(now.w-lastViewport.w)>4||Math.abs(now.h-lastViewport.h)>4){lastViewport=now;fit()}});
+rebuild();lastViewport=viewport();
+</script>
+<a href="./index.html" style="position:fixed;z-index:9999;left:16px;bottom:16px;display:inline-block;background:#fff;color:#111;border:1px solid #111;padding:7px 11px;text-decoration:none;font:13px sans-serif">← 返回专业目录</a>
+</body></html>
