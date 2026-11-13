@@ -30,6 +30,15 @@
       "industries": 18,
       "tracks": 59,
       "job_entries": 493
+    },
+    {
+      "slug": "computer-science",
+      "title": "计算机科学与技术",
+      "path": "computer-science.html",
+      "industries": 22,
+      "tracks": 88,
+      "job_entries": 722,
+      "source_count": 17
     }
   ],
   "description": "目录索引，具体页面保持为独立离线 HTML。条目数不是实时招聘职位数。"
