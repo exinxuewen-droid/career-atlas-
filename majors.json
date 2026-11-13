@@ -1,0 +1,36 @@
+{
+  "title": "CAREER ATLAS · 大学专业全就业指南",
+  "version": "2026-11-13",
+  "homepage": "index.html",
+  "majors": [
+    {
+      "slug": "electronic-information",
+      "title": "电子信息工程",
+      "path": "electronic-information.html"
+    },
+    {
+      "slug": "biomedical-engineering",
+      "title": "生物医学工程",
+      "path": "biomedical-engineering.html"
+    },
+    {
+      "slug": "mechanical-engineering",
+      "title": "机械工程",
+      "path": "mechanical-engineering.html"
+    },
+    {
+      "slug": "bioengineering",
+      "title": "生物工程",
+      "path": "bioengineering.html"
+    },
+    {
+      "slug": "automation",
+      "title": "自动化",
+      "path": "automation.html",
+      "industries": 18,
+      "tracks": 59,
+      "job_entries": 493
+    }
+  ],
+  "description": "目录索引，具体页面保持为独立离线 HTML。条目数不是实时招聘职位数。"
+}
