@@ -37,6 +37,7 @@ description: Build and publish comprehensive, evidence-grounded Chinese universi
 - `automation.html` — 自动化
 - `computer-science.html` — 计算机科学与技术
 - `communication-engineering.html` — 通信工程
+- `software-engineering.html` — 软件工程
 
 ## Data guidance
 - Represent each role as `{ name, level }`; associate fields with industry name and capability/transfer notes.
