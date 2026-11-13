@@ -36,6 +36,7 @@ description: Build and publish comprehensive, evidence-grounded Chinese universi
 - `bioengineering.html` — 生物工程
 - `automation.html` — 自动化
 - `computer-science.html` — 计算机科学与技术
+- `communication-engineering.html` — 通信工程
 
 ## Data guidance
 - Represent each role as `{ name, level }`; associate fields with industry name and capability/transfer notes.
