@@ -39,6 +39,15 @@
       "tracks": 88,
       "job_entries": 722,
       "source_count": 17
+    },
+    {
+      "slug": "communication-engineering",
+      "title": "通信工程",
+      "path": "communication-engineering.html",
+      "industries": 21,
+      "tracks": 84,
+      "job_entries": 630,
+      "source_count": 16
     }
   ],
   "description": "目录索引，具体页面保持为独立离线 HTML。条目数不是实时招聘职位数。"
