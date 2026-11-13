@@ -23,7 +23,7 @@ description: Build and publish comprehensive, evidence-grounded Chinese universi
 7. Link a representative bibliography of sources and include a clear methodology disclaimer, date, and exact counts computed from the data, not guessed.
 8. Use distinct, ASCII slug, e.g. `automation.html`, matching the site's existing naming.
 9. Before editing, fetch current `index.html` and new target path, compare latest upstream files. Do not overwrite unrelated majors, and do not replace the existing site with a one-page version. Add a card and update visible major count.
-10. Check structural validity: required file names, 5 existing majors (after 自动化), UI controls and roles datasets, no duplicate cards, non-empty sources, and no accidental broken links. Verify the original pages are preserved.
+10. Check structural validity: required file names, all existing majors, UI controls and roles datasets, no duplicate cards, non-empty sources, and no accidental broken links. Verify the original pages are preserved.
 11. Commit into the canonical GitHub repository via authorized tool / Codex. If user explicitly requested publication, commit to main when safe; otherwise create a PR. Capture real Commit ID. Netlify is triggered automatically, but do not equate GitHub commit with published website.
 12. Verify public URL with a working read method (or Netlify deployment evidence). If unavailable, say `GitHub 已更新；Netlify 线上状态尚未确认`, and share the exact expected URL with qualification. Never invent deployment success or numbers.
 13. If GitHub writes fail with 403, stop and report the error, do not switch accounts or retry with unauthorized credentials. Never ask for tokens or passwords in chat.
@@ -35,6 +35,7 @@ description: Build and publish comprehensive, evidence-grounded Chinese universi
 - `mechanical-engineering.html` — 机械工程
 - `bioengineering.html` — 生物工程
 - `automation.html` — 自动化
+- `computer-science.html` — 计算机科学与技术
 
 ## Data guidance
 - Represent each role as `{ name, level }`; associate fields with industry name and capability/transfer notes.
