@@ -48,6 +48,16 @@
       "tracks": 84,
       "job_entries": 630,
       "source_count": 16
+    },
+    {
+      "slug": "software-engineering",
+      "title": "软件工程",
+      "path": "software-engineering.html",
+      "industries": 26,
+      "tracks": 104,
+      "job_entries": 834,
+      "unique_role_names": 824,
+      "source_count": 18
     }
   ],
   "description": "目录索引，具体页面保持为独立离线 HTML。条目数不是实时招聘职位数。"
